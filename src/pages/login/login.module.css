@@ -28,8 +28,8 @@
   margin-bottom: 20px;
 }
 
-.input {
-  margin-bottom: 20px;
+.inputForm {
+  margin-bottom: 20px !important;
 }
 
 .checkbox_remember {

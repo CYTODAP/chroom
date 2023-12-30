@@ -36,7 +36,7 @@ export default function Login() {
       <form className={styles.login_pattern} onSubmit={logIn}>
         <div className={styles.welcome}>Welcome</div>
         <TextField
-          className={styles.input}
+          className={styles.inputForm}
           type="email"
           label="Email"
           variant="outlined"
@@ -45,7 +45,7 @@ export default function Login() {
           required
         />
         <TextField
-          className={styles.input}
+          className={styles.inputForm}
           type="password"
           label="Password"
           variant="outlined"

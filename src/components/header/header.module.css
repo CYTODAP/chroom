@@ -1,12 +1,13 @@
 .topbar{
   display: flex;
   justify-content: space-between;
-  margin: 0 -8px;
   position: fixed;
   top: 0;
-  width: 100%;
+  width: calc(100% - 10px);
   border-radius: 10px;
   box-shadow: #b3d7ff 0px 0px 10px 0px;
+  margin: 5px;
+  background-color: #fff;
 }
 .pagename{
   margin: 10px;
