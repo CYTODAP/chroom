@@ -1,40 +1,40 @@
+import { useRouter } from 'next/navigation'
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+import styles from './resetpassword.module.css'
 import { TextField } from '@mui/material';
-import styles from './login.module.css'
 import '../../app/globals.css'
 import { useState } from 'react';
 import "../../firebase"
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { useRouter } from 'next/navigation'
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import Session from "../../session"
-
 
 const auth = getAuth();
-export default function Login() {
+export default function ResetPassword(){
   const router = useRouter()
   const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
 
-  const logIn = (e) => {
+  const sendEmail = (e) => {
     e.preventDefault()
-    signInWithEmailAndPassword(auth, email, password)
+    sendPasswordResetEmail(auth, email)
+      .then(()=>{
+        router.replace('login')
+      })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        toast.error("Email or Password Invalid", {
+        toast.error(errorCode+" , "+errorMessage, {
           position: 'bottom-right'
         })
         // ..
       });
   }
 
-  return (
+  return(
     <div className={styles.container}>
-      <Session></Session>
+      {/* <Session></Session> */}
       <ToastContainer />
-      <form className={styles.login_pattern} onSubmit={logIn}>
-        <div className={styles.welcome}>Welcome</div>
+      <form className={styles.login_pattern} onSubmit={sendEmail}>
+        <div className={styles.welcome}>Enter your email</div>
         <TextField
           className={styles.inputForm}
           type="email"
@@ -44,7 +44,7 @@ export default function Login() {
           onChange={e => setEmail(e.target.value)}
           required
         />
-        <TextField
+        {/* <TextField
           className={styles.inputForm}
           type="password"
           label="Password"
@@ -52,15 +52,15 @@ export default function Login() {
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
-        />
-        <span className=''></span>
+        /> */}
+        {/* <span className=''></span>
         <div className={styles.checkbox_remember}>
           <input type='checkbox' className={styles.checkbox}></input>
           <lebel className={styles.label_checkbox}>Remember me</lebel>
-        </div>
-        <button type='submit' className={styles.login_button}>Login</button>
-        <a className={styles.forgotpassword} onClick={() =>router.push("/resetpassword")}>Forgot Password?</a>
-        <a className={styles.forgotpassword} onClick={() => router.push("/register")}>Register</a>
+        </div> */}
+        <button type='submit' className={styles.login_button}>Send</button>
+        {/* <a className={styles.forgotpassword}>Forgot Password?</a>
+        <a className={styles.forgotpassword} onClick={() => router.push("/register")}>Register</a> */}
       </form>
     </div>
   )

@@ -79,13 +79,15 @@
   width: calc(100% - 20px);
   height: 80px;
   padding: 10px;
+  margin-top: 5px;
 }
 
 .chat_row_active {
-  background-color: #999;
+  background-color: #e6f2ff;
   width: calc(100% - 20px);
   height: 80px;
   padding: 10px;
+  margin-top: 5px;
   border-radius: 10px;
 }
 

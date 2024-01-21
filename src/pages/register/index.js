@@ -92,7 +92,7 @@ export default function Register() {
           <label className={styles.label_checkbox}>Remember me</label>
         </div>
         <button type='submit' className={styles.login_button}>Sign Up</button>
-        <a href="#" className={styles.forgotpassword}>Forgot Password?</a>
+        {/* <a href="#" className={styles.forgotpassword}>Forgot Password?</a> */}
       </form>
     </div>
   )

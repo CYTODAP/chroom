@@ -10,10 +10,11 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { TextField } from '@mui/material';
-import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { addDoc, collection, collectionGroup, doc, getDoc, getDocs, onSnapshot, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { firestore } from "../../firebase"
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useEffect } from 'react'
+import Message from '@/components/message/message'
 
 const auth = getAuth();
 export default function Home() {
@@ -22,50 +23,10 @@ export default function Home() {
   const [chatName, setChatName] = useState("")
   const [user, setUser] = useState(null)
   const [uid, setUID] = useState("")
-  const [chatlist, setChatlist] = useState([
-    {
-      id: "111",
-      name: "chat1"
-    },
-    {
-      id: "112",
-      name: "chat2"
-    },
-    {
-      id: "113",
-      name: "chat3"
-    },
-    {
-      id: "114",
-      name: "chat4"
-    },
-    {
-      id: "115",
-      name: "chat5"
-    },
-    {
-      id: "116",
-      name: "chat6"
-    },
-    {
-      id: "117",
-      name: "chat7"
-    },
-    {
-      id: "118",
-      name: "chat8"
-    },
-    {
-      id: "119",
-      name: "chat9"
-    },
-    {
-      id: "120",
-      name: "chat10"
-    },
-  ])
+  const [chatlist, setChatlist] = useState([])
+  const [shiftCreate, setShiftCreate] = useState("name")
 
-  useEffect(()=>{
+  useEffect(() => {
     onAuthStateChanged(auth, userData => {
       if (userData) {
         setUID(userData.uid)
@@ -74,8 +35,25 @@ export default function Home() {
         })
       }
     })
-  },[])
-  
+  }, [])
+
+  useEffect(() => {
+    if (uid) {
+      const col = collection(firestore, 'chats')
+      const queryChat = query(col, where("members", "array-contains", uid))
+      const unlisten = onSnapshot(queryChat, (chats) => {
+        setChatlist(chats.docs)
+      })
+      return () => {
+        unlisten()
+      }
+    }
+  }, [uid])
+
+  const switchCreate = () => {
+    setShiftCreate(shiftCreate == "name" ? "ref" : "name")
+  }
+
   const activeChat = (chat) => {
     setActiveId(chat.id)
   }
@@ -92,19 +70,38 @@ export default function Home() {
   };
   const addChats = (e) => {
     e.preventDefault()
-    addDoc(collection(firestore, 'chats'), {
-      name: chatName,
-      createdDate: new Date()
-    }).then((chatRef) => {
-      addDoc(collection(chatRef, 'members'), {
-        username: user.username,
-        uid
+    if (shiftCreate == "name") {
+      const col = collection(firestore, 'chats')
+      addDoc(col, {
+        refCode: new Date().getTime().toString(36).toUpperCase(),
+        name: chatName,
+        createdDate: new Date(),
+        updatedDate: new Date(),
+        members: [uid]
+      }).then((chatRef) => {
+        setModalAddChat(false)
+        setChatName('')
+        setActiveId(chatRef.id)
       })
-      setModalAddChat(false)
-      setChatName('')
-    })
+    } else { 
+      const col = collection(firestore, 'chats')
+      const queryChat = query(col, where("refCode", "==", chatName))
+      getDocs(queryChat).then((chats)=>{
+        if(chats.size>0){
+          chats.docs.forEach(doc => {
+            updateDoc(doc.ref, {
+              members: doc.data().members.concat(uid),
+              updatedDate: new Date(),
+            }).then(() => {
+              setModalAddChat(false)
+              setChatName('')
+              setActiveId(doc.id)
+            })
+          });
+        }
+      })
+    }
   }
-
 
   return (
     <div className={styles.container_user}>
@@ -116,12 +113,12 @@ export default function Home() {
           </div>
           {chatlist.map((chat, i) => {
             return (
-              <div key={i} className={activeId == chat.id ? styles.chat_row_active : styles.chat_row} onClick={() => activeChat(chat)}>{chat.name}</div>
+              <div key={i} className={activeId == chat.id ? styles.chat_row_active : styles.chat_row} onClick={() => activeChat(chat)}>{chat.data().name}</div>
             )
           })}
         </div>
         <div className={styles.chat_interface}>
-
+          <Message chatid={activeId} uid={uid} user={user}></Message>
         </div>
       </div>
       <Modal
@@ -131,21 +128,43 @@ export default function Home() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Enter name to create your chatroom
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            <form onSubmit={addChats}>
-              <TextField
-                className={styles.inputForm}
-                type="text"
-                variant="outlined"
-                value={chatName}
-                onChange={e => setChatName(e.target.value)}
-                required
-              />
-            </form>
-          </Typography>
+          {shiftCreate == "name" ?
+            <>
+              <Typography id="modal-modal-title" variant="h6" component="h2">
+                Enter name to create your chatroom
+              </Typography>
+              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                <form onSubmit={addChats}>
+                  <TextField
+                    className={styles.inputForm}
+                    type="text"
+                    variant="outlined"
+                    value={chatName}
+                    onChange={e => setChatName(e.target.value)}
+                    required
+                  />
+                </form>
+                <button onClick={() => switchCreate()}>Insert chatRef</button>
+              </Typography>
+            </> :
+            <><Typography id="modal-modal-title" variant="h6" component="h2">
+              Enter chatRef
+            </Typography>
+              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                <form onSubmit={addChats}>
+                  <TextField
+                    className={styles.inputForm}
+                    type="text"
+                    variant="outlined"
+                    value={chatName}
+                    onChange={e => setChatName(e.target.value)}
+                    required
+                  />
+                </form>
+                <button onClick={() => switchCreate()}>Create chat</button>
+              </Typography>
+            </>
+          }
         </Box>
       </Modal>
     </div>
