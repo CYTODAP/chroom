@@ -64,7 +64,8 @@ export default function Home() {
     transform: 'translate(-50%, -50%)',
     width: 400,
     bgcolor: 'background.paper',
-    border: '2px solid #000',
+    border: '1px solid #000',
+    borderRadius: '5px',
     boxShadow: 24,
     p: 4,
   };
@@ -126,32 +127,34 @@ export default function Home() {
         onClose={() => setModalAddChat(false)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+        // className={styles.modal_interface}
       >
         <Box sx={style}>
           {shiftCreate == "name" ?
             <>
-              <Typography id="modal-modal-title" variant="h6" component="h2">
-                Enter name to create your chatroom
+              <Typography className={styles.modalform} id="modal-modal-title" variant="h6" component="h2">
+                Create your chatroom
               </Typography>
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                <form onSubmit={addChats}>
+                <form className={styles.modalform} onSubmit={addChats}>
                   <TextField
                     className={styles.inputForm}
                     type="text"
                     variant="outlined"
                     value={chatName}
                     onChange={e => setChatName(e.target.value)}
+                    placeholder='Your chatroom name'
                     required
                   />
                 </form>
-                <button onClick={() => switchCreate()}>Insert chatRef</button>
+                <div className={styles.modalform}><button className={styles.switchButton} onClick={() => switchCreate()}>Insert Chatroom Code</button></div>
               </Typography>
             </> :
-            <><Typography id="modal-modal-title" variant="h6" component="h2">
-              Enter chatRef
+            <><Typography className={styles.modalform} id="modal-modal-title" variant="h6" component="h2">
+              Enter code to join chat
             </Typography>
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                <form onSubmit={addChats}>
+                <form className={styles.modalform} onSubmit={addChats}>
                   <TextField
                     className={styles.inputForm}
                     type="text"
@@ -161,7 +164,7 @@ export default function Home() {
                     required
                   />
                 </form>
-                <button onClick={() => switchCreate()}>Create chat</button>
+                <div className={styles.modalform}><button className={styles.switchButton} onClick={() => switchCreate()}>Create chat</button></div>
               </Typography>
             </>
           }
